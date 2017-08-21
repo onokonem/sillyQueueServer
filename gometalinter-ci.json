@@ -1,0 +1,19 @@
+{
+  "Disable": [
+    "gotype"
+  ],
+  "Vendor": true,
+  "Concurrency": 8,
+  "Deadline": "15m",
+  "Skip": [
+    "gen"
+  ],
+  "Sort": [
+    "path",
+    "line",
+    "linter"
+  ],
+  "Exclude": [
+    "cyclomatic complexity \\d+ of function enumerateQuotes\\(\\) is high \\(> 10\\) \\(gocyclo\\)$"
+  ]
+}
