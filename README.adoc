@@ -1,1 +1,1 @@
-# sillyQueueServer
+# sillyQueueServer image:https://godoc.org/github.com/onokonem/sillyQueueServer?status.svg["GoDoc",link="http://godoc.org/github.com/onokonem/sillyQueueServer"] image:https://travis-ci.org/onokonem/sillyQueueServer.svg["Build Status",link="https://travis-ci.org/onokonem/sillyQueueServer"] image:https://coveralls.io/repos/onokonem/sillyQueueServer/badge.svg?branch=master&service=github["Coverage Status",link="https://coveralls.io/github/onokonem/sillyQueueServer?branch=master"]
