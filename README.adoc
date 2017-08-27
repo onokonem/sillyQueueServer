@@ -1,1 +1,60 @@
 # sillyQueueServer image:https://godoc.org/github.com/onokonem/sillyQueueServer?status.svg["GoDoc",link="http://godoc.org/github.com/onokonem/sillyQueueServer"] image:https://travis-ci.org/onokonem/sillyQueueServer.svg["Build Status",link="https://travis-ci.org/onokonem/sillyQueueServer"] image:https://coveralls.io/repos/onokonem/sillyQueueServer/badge.svg?branch=master&service=github["Coverage Status",link="https://coveralls.io/github/onokonem/sillyQueueServer?branch=master"]
+:TOC:
+
+## What is this?
+
+This is my very own look to the messages queuing problem.
+
+There are dozen of queue servers doing very well, but sometime I have a feeling some simple features has to be supported natively.
+
+So this is the PoC code.
+
+## Ideas this code based on
+
+### Subscribe is simple
+
+Subscribe based on channel name and message subject filter.
+
+Filter is a combination of zero or more channel name prefixes and zero or more subject prefixes. Empty filter means "accepting everything".
+
+Channels are not really exists: they are just names in the message header.
+
+### Just 3 delivery types required
+
+1. *Anyone*: Message will be delivered exactly once to one randomly picked client connected at the moment. In case no clients are connected at the moment message will be delivered to the first one subscribed later.
+2. *Everyone*: every of the clients subscribed at the moment will receive it.
+3. *EveryoneNowAndFuture*: message will be kept forever, delivered to everyone subscribed at the moment and to anyone subscribed in the future.
+
+### Processing errors
+
+Processing error must be handled properly.
+
+There are 3 types of processing errors to handle:
+
+1. *timeout*: no one subscriber accepted the message in the time provided. Message removed from the queue, acknowledgement passed to the originator if requested.
+2. *aborted*: message was accepted by some subscriber but it did not come in time with a status. Message returned to the queue, apropriate acknowledgement passed to the originator if requested. To perform a really long processing subscriber will have to send _StillInProcess_ message periodically to prevent message from becoming aborted.
+3. *dismissed*: subscriber reported task is unprocessable for some reason. Message removed from the queue, acknowledgement passed to the originator if requested.
+
+### Acknowledgement might be useful
+
+These acknowledgements can be requested on message submission:
+
+- *queued*: message queued.
+- *accepted*: message passed to the subscriber.
+- *done*: subscriber reported message processed successfully.
+- *timeout*: task was removed from the queue becase it was not accepted in time.
+- *aborted*: task processing did not complete in time.
+- *dismissed*: task was reported as unprocessable.
+
+Note: acknowledgements delivery is not guaranteed.
+
+### Persistence: 3 types
+
+We need queue persistence. But we have to keep it under control.
+
+So the types of persistence are:
+
+1. *Writetrough*: task will be persisted to disk before _queued_ acknowledgement.
+2. *Wrightback*: task will be persisted to disk sometimes after the _queued_ acknowledgement.
+3. *None*: task will not be persisted to disk.
+

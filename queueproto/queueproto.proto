@@ -1,0 +1,137 @@
+syntax = "proto3";
+
+service Queue {
+  rpc Ack (stream AckToHub) returns (stream AckFromHub);
+}
+
+message AckToHub {
+  oneof msg {
+    Attach         attach     = 1;
+    Subscribe      subscribe  = 2;
+    QueueTask      queue      = 3;
+    Ping           ping       = 5;
+
+    Accepted       accepted   = 10;
+    Done           done       = 11;
+    InProgress     inProgress = 12;
+    Dismissed      dismissed  = 13;
+  }
+}
+
+message AckFromHub {
+  oneof msg {
+    Attached       attached   = 1;
+    Subscribed     subscribed = 2;
+    Queued         queued     = 3;
+    Rejected       rejected   = 4;
+    Pong           pong       = 5;
+
+    Accept         accept     = 9;
+
+    Accepted       accepted   = 10;
+    Done           done       = 11;
+    InProgress     inProgress = 12;
+    Dismissed      dismissed  = 13;
+    Timeouted      timeouted  = 14;
+    Aborted        aborted    = 15;
+  }
+}
+
+message QueueTask {
+  string queue      = 1;
+  string id         = 2;
+  string subject    = 3;
+  string originator = 4;
+  uint64 timeout    = 5;
+
+  enum Persistence {
+    Writetrough = 0;
+    Writeback   = 1;
+    None        = 2;
+  }
+  Persistence persistence = 6;
+
+  enum Delivery {
+    Anyone               = 0;
+    Everyone             = 1;
+    EveryoneNowAndFuture = 2;
+  }
+  Delivery delivery = 7;
+
+  message Acknowledgement {
+    bool accepted  = 2;
+    bool done      = 3;
+    bool timeout   = 4;
+    bool aborted   = 5;
+    bool dismissed = 6;
+  }
+  Acknowledgement ack = 8;
+
+  bytes payload = 9;
+}
+
+message Queued {
+  string id  = 2;
+}
+
+message Rejected {
+  string id     = 2;
+  string reason = 10;
+}
+
+message Attached {
+  string originator = 4;
+}
+
+message Subscribed {
+  string originator = 4;
+}
+
+message Accept {
+  string queue    = 1;
+  string id       = 2;
+  string subject  = 3;
+  bytes  payload  = 9;
+}
+
+message Attach {
+  string originator = 4;
+}
+
+message Subscribe {
+  repeated string queue    = 1;
+  repeated string subject  = 3;
+  int64           sequence = 8;
+}
+
+message Ping {
+  bool alive = 1;
+}
+
+message Pong {
+  bool alive = 1;
+}
+
+message Accepted {
+  string id = 2;
+}
+
+message Done {
+  string id = 2;
+}
+
+message Timeouted {
+  string id = 2;
+}
+message Aborted {
+  string id = 2;
+}
+
+message Dismissed {
+  string id = 2;
+}
+
+message InProgress {
+  string id = 2;
+}
+
