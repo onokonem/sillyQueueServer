@@ -8,12 +8,15 @@ before_install:
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
   - go get golang.org/x/tools/cmd/cover
-  - go get gopkg.in/alecthomas/gometalinter.v1
+  #- go get gopkg.in/alecthomas/gometalinter.v1
   #- gometalinter.v1 --install
 
 script:
   #- gometalinter.v1 --config=gometalinter-ci.json ./...
-  - go test -v -race ./...
+  - go test github.com/onokonem/sillyQueueServer/tasks
+  - go test github.com/onokonem/sillyQueueServer/db
+  - go test github.com/onokonem/sillyQueueServer/queue
+  - go test github.com/onokonem/sillyQueueServer/logiface
 
 after_success:
   - test "$TRAVIS_GO_VERSION" = "1.8" && goveralls -service=travis-ci
