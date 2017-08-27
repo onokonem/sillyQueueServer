@@ -58,7 +58,7 @@ func TestReadWrite(t *testing.T) {
 	task := tasks.NewTask(&queueproto.QueueTask{Id: taskID, Payload: []byte(timeuuid.TimeUUID().String())})
 
 	dbConn.Saver() <- task
-	time.Sleep(time.Millisecond * 2)
+	time.Sleep(time.Millisecond * 100)
 
 	newTask, err := dbConn.GetTask(taskID)
 	if err != nil {

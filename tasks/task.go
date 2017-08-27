@@ -112,8 +112,13 @@ func (t *Task) SetID(id string) {
 	t.id = id
 }
 
+var emptyByteSlice = make([]byte, 0)
+
 // Marshal marshals Task to the JSON bytes
 func (t *Task) Marshal() []byte {
+	if t == nil {
+		return emptyByteSlice
+	}
 	t.lock.RLock()
 	defer t.lock.RUnlock()
 
