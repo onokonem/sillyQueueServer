@@ -15,12 +15,12 @@ import (
 
 func TestOpenClose(t *testing.T) {
 	fileName := timeuuid.TimeUUID().String()
-	defer os.Remove(fileName)
 
 	dbConn, err := db.Open("bolt", fileName)
 	if err != nil {
 		t.Fatalf("Close() returned error: %v", err)
 	}
+	defer mustRemove(fileName)
 
 	if fmt.Sprintf(`DB<"%s">`, fileName) != dbConn.String() {
 		t.Fatalf("unexpected DB String(): %q", dbConn.String())
@@ -45,12 +45,12 @@ func TestOpenClose(t *testing.T) {
 
 func TestReadWrite(t *testing.T) {
 	fileName := timeuuid.TimeUUID().String()
-	defer os.Remove(fileName)
 
 	dbConn, err := db.Open("bolt", fileName)
 	if err != nil {
 		t.Fatalf("Close() returned error: %v", err)
 	}
+	defer mustRemove(fileName)
 
 	go dbConn.SaverLoop(time.Millisecond, 1024, structlog.New())
 
@@ -69,7 +69,7 @@ func TestReadWrite(t *testing.T) {
 		t.Fatalf("Restored task is not the same as saved\n%#+v\n%#+v", newTask, task)
 	}
 
-	dbConn.SaveTasks(
+	err = dbConn.SaveTasks(
 		tasks.NewTask(
 			&queueproto.QueueTask{
 				Id:      timeuuid.TimeUUID().String(),
@@ -77,6 +77,9 @@ func TestReadWrite(t *testing.T) {
 			},
 		),
 	)
+	if err != nil {
+		t.Fatalf("Save task iteration error: %v", err)
+	}
 
 	count, err := dbConn.Foreach(
 		func(task *tasks.Task) error {
@@ -84,7 +87,7 @@ func TestReadWrite(t *testing.T) {
 		},
 	)
 	if err != nil {
-		t.Fatalf("Saved task iteration error: %v", err)
+		t.Fatalf("Save task iteration error: %v", err)
 	}
 
 	if count != 2 {
@@ -103,4 +106,11 @@ func mustClose(dbConn db.Connect) (err error) {
 	dbConn.MustClose()
 
 	return nil
+}
+
+func mustRemove(name string) {
+	err := os.Remove(name)
+	if err != nil {
+		panic(err)
+	}
 }

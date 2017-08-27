@@ -49,8 +49,7 @@ func prepareServer(logger logiface.Logger) net.Listener {
 	if err != nil {
 		logger.Panicf("%v", err)
 	}
-	defer dbConn.MustClose()
-	os.Remove(fileName)
+	mustRemove(fileName)
 
 	tcpServer, err := net.Listen("tcp", "")
 	if err != nil {
@@ -162,7 +161,7 @@ func (c *client) sendLoop() {
 		err := c.ackClient.Send(ack)
 		if err != nil {
 			c.logger.Fatalf("Error sending to server: client %q: %v", c.clientID, err)
-			return
+			break
 		}
 	}
 	c.logger.Debug("Send loop finished", "client", c.clientID)
@@ -175,7 +174,7 @@ func (c *client) recvLoop() {
 		ack, err := c.ackClient.Recv()
 		if err != nil {
 			c.logger.Fatalf("Error reading from server: client %q: %v", c.clientID, err)
-			return
+			break
 		}
 		c.in <- ack
 	}
@@ -649,5 +648,12 @@ func testQueue3(logger logiface.Logger) {
 
 	if count != maxCount {
 		logger.Fatalf("Wrong delivery count: got %v but %v expected", count, maxCount)
+	}
+}
+
+func mustRemove(name string) {
+	err := os.Remove(name)
+	if err != nil {
+		panic(err)
 	}
 }

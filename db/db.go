@@ -8,12 +8,6 @@ import (
 	"github.com/onokonem/sillyQueueServer/tasks"
 )
 
-var (
-	errAlreadyExists = fmt.Errorf("Key already exists")
-	errConnectClosed = fmt.Errorf("Connect closed")
-	// errBadRecord     = fmt.Errorf("Record damaged")
-)
-
 // ForeachFunc is a type of func to be passed to Foreach method
 type ForeachFunc func(task *tasks.Task) error
 

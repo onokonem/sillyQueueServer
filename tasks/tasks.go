@@ -25,7 +25,7 @@ func (s *Storage) Add(task *Task) {
 	s.storage[task.id] = task
 }
 
-// Add adds task to the sorage
+// Restore adds task to the sorage with respect to the sequence internal variable
 func (s *Storage) Restore(task *Task) {
 	s.Lock()
 	defer s.Unlock()

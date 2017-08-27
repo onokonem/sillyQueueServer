@@ -107,7 +107,7 @@ func (t *Task) ID() string {
 	return t.id
 }
 
-// ID sets task id (surprise)
+// SetID sets task id (surprise)
 func (t *Task) SetID(id string) {
 	t.id = id
 }

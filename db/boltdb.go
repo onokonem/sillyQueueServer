@@ -230,17 +230,6 @@ func upsertBunchTransaction(tx *bolt.Tx, tasksList ...*tasks.Task) error {
 	return nil
 }
 
-func unmarshalTask(data []byte) (*tasks.Task, error) {
-	content := tasks.Task{}
-
-	err := json.Unmarshal(data, &content)
-	if err != nil {
-		return nil, err
-	}
-
-	return &content, nil
-}
-
 func closeRO(tx *bolt.Tx) {
 	err := tx.Rollback()
 	if err != nil {
@@ -268,16 +257,16 @@ func (conn *boltDB) Foreach(f ForeachFunc) (int, error) {
 		func(key []byte, val []byte) error {
 			taskID := string(key)
 
-			task, err := unmarshalPayload(key, val)
-			if err != nil {
-				return err
+			task, innerErr := unmarshalPayload(key, val)
+			if innerErr != nil {
+				return innerErr
 			}
 
 			task.SetID(taskID)
 
-			err = f(task)
-			if err != nil {
-				return err
+			innerErr = f(task)
+			if innerErr != nil {
+				return innerErr
 			}
 
 			count++

@@ -1,5 +1,6 @@
 {
   "Disable": [
+    "aligncheck",
     "gotype"
   ],
   "Vendor": true,
@@ -16,6 +17,12 @@
     "linter"
   ],
   "Exclude": [
-    "cyclomatic complexity \\d+ of function enumerateQuotes\\(\\) is high \\(> 10\\) \\(gocyclo\\)$"
+    "cyclomatic complexity \\d+ of function \\(\\*Server\\)\\.queue\\(\\) is high \\(> 10\\) \\(gocyclo\\)$",
+    "cyclomatic complexity \\d+ of function \\(\\*Server\\)\\.Ack\\(\\) is high \\(> 10\\) \\(gocyclo\\)$",
+    "cyclomatic complexity \\d+ of function testQueue3\\(\\) is high \\(> 10\\) \\(gocyclo\\)$",
+    "cyclomatic complexity \\d+ of function testQueue2\\(\\) is high \\(> 10\\) \\(gocyclo\\)$",
+    "cyclomatic complexity \\d+ of function testQueue1\\(\\) is high \\(> 10\\) \\(gocyclo\\)$",
+    "cyclomatic complexity \\d+ of function updateTaskStatus\\(\\) is high \\(> 10\\) \\(gocyclo\\)$",
+    "cyclomatic complexity \\d+ of function \\(*Server\\).queue\\(\\) is high \\(> 10\\) \\(gocyclo\\)$"
   ]
 }

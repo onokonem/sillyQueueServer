@@ -54,7 +54,7 @@ func NewServer(
 // queue method queues a task
 func (s *Server) queue(
 	task *queueproto.QueueTask,
-) error {
+) (err error) {
 	newTask := tasks.NewTask(task)
 
 	if s.tasks.Get(newTask.ID()) != nil {
@@ -63,10 +63,16 @@ func (s *Server) queue(
 
 	switch newTask.Persistence {
 	case tasks.PersistenceWritetrough:
-		s.db.SaveTasks(newTask)
+		err = s.db.SaveTasks(newTask)
 	case tasks.PersistenceWriteback:
 		s.db.Saver() <- newTask
 	}
+
+	if err != nil {
+		return err
+	}
+
+	s.tasks.Add(newTask)
 
 	dispatched := s.connects.foreach(
 		func(connID connIDType, conn *connInfo) (bool, bool) {
@@ -80,7 +86,6 @@ func (s *Server) queue(
 	)
 
 	if newTask.Delivery == tasks.DeliveryEveryone {
-		s.tasks.Add(newTask)
 		return nil
 	}
 
@@ -104,12 +109,16 @@ func (s *Server) queue(
 
 	switch newTask.Persistence {
 	case tasks.PersistenceWritetrough:
-		s.db.SaveTasks(newTask)
+		err = s.db.SaveTasks(newTask)
 	case tasks.PersistenceWriteback:
 		s.db.Saver() <- newTask
 	}
 
-	// ToDo: possible diplication
+	if err != nil {
+		return err
+	}
+
+	// ToDo: possible duplication
 	s.tasks.Add(newTask)
 
 	s.logger.Debug("Task queued", "id", newTask.ID(), "task", newTask)
@@ -148,13 +157,19 @@ func (s *Server) Ack(ackServer queueproto.Queue_AckServer) error {
 			clientID = clientIDType(msg.Attach.Originator)
 			s.connects.attach(connID, clientID)
 
-			ackServer.Send(makeAckAttached(clientID))
+			err = ackServer.Send(makeAckAttached(clientID))
+			if err != nil {
+				return s.logger.Err("Sending error", "err", err)
+			}
 
 			s.logger.Info("Attached", "conn", connID, "client", clientID)
 
 		case *queueproto.AckToHub_Subscribe:
 			conn.subscribe(msg.Subscribe.Queue, msg.Subscribe.Subject)
-			ackServer.Send(makeAckSubscribed(clientID))
+			err := ackServer.Send(makeAckSubscribed(clientID))
+			if err != nil {
+				return s.logger.Err("Sending error", "err", err)
+			}
 
 			dispatched := s.tasks.Foreach(
 				func(id string, task *tasks.Task) (bool, bool) {
@@ -180,12 +195,21 @@ func (s *Server) Ack(ackServer queueproto.Queue_AckServer) error {
 		case *queueproto.AckToHub_Queue:
 			err := s.queue(msg.Queue)
 			if err != nil {
-				ackServer.Send(makeAckRejected(msg.Queue.Id, err.Error()))
+				err = ackServer.Send(makeAckRejected(msg.Queue.Id, err.Error()))
+				if err != nil {
+					return s.logger.Err("Sending error", "err", err)
+				}
 			}
-			ackServer.Send(makeAckQueued(msg.Queue.Id))
+			err = ackServer.Send(makeAckQueued(msg.Queue.Id))
+			if err != nil {
+				return s.logger.Err("Sending error", "err", err)
+			}
 
 		case *queueproto.AckToHub_Ping:
-			ackServer.Send(makeAckPong())
+			err := ackServer.Send(makeAckPong())
+			if err != nil {
+				return s.logger.Err("Sending error", "err", err)
+			}
 
 		case *queueproto.AckToHub_Accepted:
 			updateTaskStatus(s, msg.Accepted.Id, tasks.StatusAccepted)
@@ -293,7 +317,7 @@ func updateTaskStatus(s *Server, taskID string, status tasks.StatusType) {
 
 // sendAck passes Ack to the client
 func (s *Server) sendAck(client clientIDType, ack *queueproto.AckFromHub) error {
-	_, conn := s.connects.getConn(clientIDType(client))
+	_, conn := s.connects.getConn(client)
 
 	if conn == nil {
 		return s.logger.Err("No connection", "client", client)
@@ -309,7 +333,11 @@ func (s *Server) saveTask(task *tasks.Task) {
 
 	switch task.Persistence {
 	case tasks.PersistenceWritetrough:
-		s.db.SaveTasks(task)
+		err := s.db.SaveTasks(task)
+		if err != nil {
+			s.logger.PrintErr("Sending error", "err", err)
+			return
+		}
 	case tasks.PersistenceWriteback:
 		s.db.Saver() <- task
 	}
