@@ -212,7 +212,7 @@ func testAttach(logger logiface.Logger) {
 		defer wg.Done()
 
 		for {
-			chosen, value, ok := reflect.Select(cases)
+			chosen, value, _ := reflect.Select(cases)
 
 			if chosen == 0 {
 				break
@@ -280,7 +280,7 @@ func testSubscribeAllBut3(logger logiface.Logger) {
 		defer wg.Done()
 
 		for {
-			chosen, value, ok := reflect.Select(cases)
+			chosen, value, _ := reflect.Select(cases)
 
 			if chosen == 0 {
 				break
@@ -348,7 +348,7 @@ func testQueue1(logger logiface.Logger) {
 		defer wg.Done()
 
 		for {
-			chosen, value, ok := reflect.Select(cases)
+			chosen, value, _ := reflect.Select(cases)
 
 			if chosen == 0 {
 				break
@@ -436,7 +436,7 @@ func testQueue2(logger logiface.Logger) {
 		defer wg.Done()
 
 		for {
-			chosen, value, ok := reflect.Select(cases)
+			chosen, value, _ := reflect.Select(cases)
 
 			if chosen == 0 {
 				break
@@ -529,7 +529,7 @@ func testQueue3(logger logiface.Logger) {
 		defer wg.Done()
 
 		for {
-			chosen, value, ok := reflect.Select(cases)
+			chosen, value, _ := reflect.Select(cases)
 
 			if chosen == 0 {
 				break

@@ -264,7 +264,7 @@ func (conn *boltDB) Foreach(f ForeachFunc) (int, error) {
 	}
 
 	count := 0
-	bucket.ForEach(
+	err = bucket.ForEach(
 		func(key []byte, val []byte) error {
 			taskID := string(key)
 
@@ -285,5 +285,5 @@ func (conn *boltDB) Foreach(f ForeachFunc) (int, error) {
 		},
 	)
 
-	return count, nil
+	return count, err
 }

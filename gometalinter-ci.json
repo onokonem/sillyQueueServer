@@ -6,6 +6,8 @@
   "Concurrency": 8,
   "Deadline": "15m",
   "Skip": [
+    "timeuuid",
+    "queueproto",
     "gen"
   ],
   "Sort": [
