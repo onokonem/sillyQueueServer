@@ -8,11 +8,14 @@ before_install:
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
   - go get golang.org/x/tools/cmd/cover
-  #- go get gopkg.in/alecthomas/gometalinter.v1
-  #- gometalinter.v1 --install
+  - go get gopkg.in/alecthomas/gometalinter.v1
+  - gometalinter.v1 --install
 
 script:
-  #- gometalinter.v1 --config=gometalinter-ci.json ./...
+  - gometalinter.v1 --config=gometalinter-ci.json ./tasks
+  - gometalinter.v1 --config=gometalinter-ci.json ./db
+  - gometalinter.v1 --config=gometalinter-ci.json ./queue
+  - gometalinter.v1 --config=gometalinter-ci.json ./logiface
   - go test github.com/onokonem/sillyQueueServer/tasks
   - go test github.com/onokonem/sillyQueueServer/db
   - go test github.com/onokonem/sillyQueueServer/queue
