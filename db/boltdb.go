@@ -52,7 +52,7 @@ func (conn *boltDB) SaverLoop(interval time.Duration, bunchSize int, logger logi
 				flushBufOneATime(conn, buf, &semaphore, logger)
 				buf = make([]*tasks.Task, 0, bunchSize)
 			}
-		case _ = <-timer.C:
+		case <-timer.C:
 			if len(buf) > 0 {
 				logger.Debug("DB cache flushing by time", "size", len(buf))
 				flushBufOneATime(conn, buf, &semaphore, logger)

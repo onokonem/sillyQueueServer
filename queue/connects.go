@@ -43,7 +43,7 @@ func (cc *connectsStorage) getConn(client clientIDType) (connIDType, *connInfo) 
 
 func (cc *connectsStorage) get(connID connIDType) *connInfo {
 	cc.RLock()
-	cc.RUnlock()
+	defer cc.RUnlock()
 
 	return cc.connects[connID]
 }
