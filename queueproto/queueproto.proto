@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option java_package = "com.github.onokonem.sillyQueueServer.client";
+
 service Queue {
   rpc Ack (stream AckToHub) returns (stream AckFromHub);
 }
